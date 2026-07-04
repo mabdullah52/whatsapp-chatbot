@@ -49,7 +49,7 @@
     </div>
 
     <script>
-        const API = 'http://localhost:8001';
+        const API = window.location.origin;
 
         async function uploadFile() {
             const file = document.getElementById('file-input').files[0];
