@@ -4,7 +4,7 @@ from fastapi import FastAPI, UploadFile, File, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, PlainTextResponse
 import chromadb
-from app.rag import query_rag, get_embedding
+from app.rag import query_rag, get_embedding, send_whatsapp_reply
 
 app = FastAPI()
 
@@ -31,13 +31,13 @@ async def verify_webhook(request: Request):
 @app.post("/webhook")
 async def receive_message(request: Request):
     body = await request.json()
-    print("INCOMING PAYLOAD:", body)
+    print("INCOMING PAYLOAD:", body, flush=True)
     try:
         entry = body["entry"][0]
         changes = entry["changes"][0]
         value = changes["value"]
         if "messages" not in value:
-            print("NO MESSAGES KEY - likely a status update, ignoring")
+            print("NO MESSAGES KEY - likely a status update, ignoring", flush=True)
             return {"status": "ok"}
         message = value["messages"][0]
         sender = message["from"]
@@ -50,11 +50,11 @@ async def receive_message(request: Request):
             phone_number_id=phone_number_id,
             access_token=os.environ.get("WHATSAPP_ACCESS_TOKEN")
         )
-        print("SEND RESULT:", result)
+        print("SEND RESULT:", result, flush=True)
         return {"status": "ok"}
     except Exception as e:
         import traceback
-        print("WEBHOOK ERROR:", e)
+        print("WEBHOOK ERROR:", e, flush=True)
         traceback.print_exc()
         return {"status": "ok"}
 
