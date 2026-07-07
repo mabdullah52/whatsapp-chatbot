@@ -31,24 +31,31 @@ async def verify_webhook(request: Request):
 @app.post("/webhook")
 async def receive_message(request: Request):
     body = await request.json()
+    print("INCOMING PAYLOAD:", body)
     try:
         entry = body["entry"][0]
         changes = entry["changes"][0]
         value = changes["value"]
+        if "messages" not in value:
+            print("NO MESSAGES KEY - likely a status update, ignoring")
+            return {"status": "ok"}
         message = value["messages"][0]
         sender = message["from"]
         text = message["text"]["body"]
         phone_number_id = value["metadata"]["phone_number_id"]
         reply = query_rag(text, collection)
-        from app.rag import send_whatsapp_reply
-        send_whatsapp_reply(
+        result = send_whatsapp_reply(
             to=sender,
             message=reply,
             phone_number_id=phone_number_id,
             access_token=os.environ.get("WHATSAPP_ACCESS_TOKEN")
         )
+        print("SEND RESULT:", result)
         return {"status": "ok"}
-    except Exception:
+    except Exception as e:
+        import traceback
+        print("WEBHOOK ERROR:", e)
+        traceback.print_exc()
         return {"status": "ok"}
 
 @app.post("/upload")
