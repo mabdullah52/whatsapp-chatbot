@@ -1,3 +1,5 @@
+import os
+import httpx
 from fastapi import FastAPI, UploadFile, File, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, PlainTextResponse
@@ -36,8 +38,16 @@ async def receive_message(request: Request):
         message = value["messages"][0]
         sender = message["from"]
         text = message["text"]["body"]
+        phone_number_id = value["metadata"]["phone_number_id"]
         reply = query_rag(text, collection)
-        return {"status": "ok", "reply": reply}
+        from app.rag import send_whatsapp_reply
+        send_whatsapp_reply(
+            to=sender,
+            message=reply,
+            phone_number_id=phone_number_id,
+            access_token=os.environ.get("WHATSAPP_ACCESS_TOKEN")
+        )
+        return {"status": "ok"}
     except Exception:
         return {"status": "ok"}
 

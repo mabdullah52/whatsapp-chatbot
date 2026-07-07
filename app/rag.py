@@ -36,3 +36,18 @@ def query_rag(question: str, collection=None) -> str:
         messages=messages
     )
     return response.choices[0].message.content
+import httpx
+
+def send_whatsapp_reply(to: str, message: str, phone_number_id: str, access_token: str):
+    url = f"https://graph.facebook.com/v18.0/{phone_number_id}/messages"
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": to,
+        "type": "text",
+        "text": {"body": message}
+    }
+    httpx.post(url, headers=headers, json=payload)
