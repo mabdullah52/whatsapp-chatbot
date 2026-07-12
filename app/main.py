@@ -21,11 +21,18 @@ async def root():
 @app.get("/test-outbound")
 async def test_outbound():
     import httpx
+    results = {}
     try:
         resp = httpx.get("https://www.google.com", timeout=10.0)
-        return {"google_status": resp.status_code}
+        results["google_status"] = resp.status_code
     except Exception as e:
-        return {"google_error": str(e)}
+        results["google_error"] = str(e)
+    try:
+        resp = httpx.get("https://graph.facebook.com", timeout=15.0)
+        results["graph_status"] = resp.status_code
+    except Exception as e:
+        results["graph_error"] = str(e)
+    return results
     
 @app.get("/webhook")
 async def verify_webhook(request: Request):
