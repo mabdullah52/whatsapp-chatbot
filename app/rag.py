@@ -37,6 +37,16 @@ def send_whatsapp_reply(to: str, message: str, phone_number_id: str, access_toke
     url = f"https://graph.facebook.com/v18.0/{phone_number_id}/messages"
     headers = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"}
     payload = {"messaging_product": "whatsapp", "to": to, "type": "text", "text": {"body": message}}
-    resp = httpx.post(url, headers=headers, json=payload)
-    print("WHATSAPP API STATUS:", resp.status_code, resp.text, flush=True)
-    return resp.json()
+
+    timeout = httpx.Timeout(connect=30.0, read=30.0, write=30.0, pool=30.0)
+    last_error = None
+    for attempt in range(3):
+        try:
+            resp = httpx.post(url, headers=headers, json=payload, timeout=timeout)
+            print("WHATSAPP API STATUS:", resp.status_code, resp.text, flush=True)
+            return resp.json()
+        except httpx.ConnectTimeout as e:
+            last_error = e
+            print(f"ATTEMPT {attempt+1} TIMED OUT, retrying...", flush=True)
+    print("ALL ATTEMPTS FAILED:", last_error, flush=True)
+    return {"error": str(last_error)}
