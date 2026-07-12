@@ -18,7 +18,15 @@ VERIFY_TOKEN = "umme_shafiqa_verify_123"
 @app.get("/")
 async def root():
     return FileResponse("app/static/index.html")
-
+@app.get("/test-outbound")
+async def test_outbound():
+    import httpx
+    try:
+        resp = httpx.get("https://www.google.com", timeout=10.0)
+        return {"google_status": resp.status_code}
+    except Exception as e:
+        return {"google_error": str(e)}
+    
 @app.get("/webhook")
 async def verify_webhook(request: Request):
     mode = request.query_params.get("hub.mode")
