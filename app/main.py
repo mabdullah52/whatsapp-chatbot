@@ -62,7 +62,7 @@ async def receive_message(request: Request):
         result = send_whatsapp_reply(
             to=sender,
             message=reply,
-            phone_number_id=phone_number_id,
+            phone_number_id=1108243032381763,
             access_token=os.environ.get("WHATSAPP_ACCESS_TOKEN")
         )
         print("SEND RESULT:", result, flush=True)
